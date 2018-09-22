@@ -1,0 +1,13 @@
+{
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "require": {
+        "php" : "7.1.*",
+        "team-reflex/discord-php": "^4.0",
+        "vlucas/phpdotenv": "^2.5",
+        "catfan/Medoo": "^1.5"
+    }
+}
