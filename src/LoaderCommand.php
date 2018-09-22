@@ -14,7 +14,7 @@ class LoaderCommand
     public function __construct(Message $message)
     {
         if ($message->content[0] != $this->prefix) {
-            return;
+            return null;
         }
 
         $this->message = $message;

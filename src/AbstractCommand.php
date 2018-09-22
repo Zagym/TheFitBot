@@ -5,6 +5,7 @@ namespace App;
 
 use CharlotteDunois\Yasmin\Models\Message;
 use CharlotteDunois\Yasmin\Interfaces\TextChannelInterface as Channel;
+use CharlotteDunois\Yasmin\Models\User;
 
 abstract class AbstractCommand
 {
@@ -14,9 +15,13 @@ abstract class AbstractCommand
     /** @var Channel $channel */
     protected $channel;
 
+    /** @var User $author */
+    protected $author;
+
     public function __construct(Message $message) {
         $this->message = $message;
         $this->channel = $message->channel;
+        $this->author = $message->author;
     }
 
     abstract protected function load();

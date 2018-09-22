@@ -5,11 +5,11 @@ namespace App\Bank;
 use App\AbstractCommand;
 use App\Database;
 use CharlotteDunois\Yasmin\Models\Message;
-use Medoo\Medoo;
 use CharlotteDunois\Yasmin\Models\User;
 use CharlotteDunois\Yasmin\Utils\Collection;
+use Medoo\Medoo;
 
-class Register extends AbstractCommand
+class Balance extends AbstractCommand
 {
     use BankTrait;
 
@@ -40,34 +40,44 @@ class Register extends AbstractCommand
 
             /** @var User $user */
             foreach ($users as $user) {
-                if ($this->isUserInDb($user)) {
-                    $messages .= sprintf('L\'utilisateur %s a déjà un compte.' . PHP_EOL, $user->username);
+                if (!$this->isUserInDb($user)) {
+                    $messages .= sprintf('L\'utilisateur %s n\'as pas de compte' . PHP_EOL, $user->username);
                     continue;
                 }
-                $this->insert($user);
-                $messages .= sprintf('Le compte de l\'utilisateur %s a été créé.' . PHP_EOL, $user->username);
+                $messages .= sprintf(
+                    'L\'utilisateur %s a %s en banque.' . PHP_EOL,
+                    $user->username,
+                    $this->getBalance($this->author)
+                );
             }
 
             return $this->channel->send($messages);
         }
 
-        if ($this->isUserInDb($users)) {
-
-            return $this->channel->send('Vous avez déjà un compte.');
+        if (!$this->isUserInDb($this->author)) {
+            return $this->channel->send('Vous n\'avez pas encore de compte. Veuillez vous enregistrer avec la commande "?register"');
         }
 
-        $this->insert($users);
-
-        return $this->channel->send('Votre compte à été créé.');
+        return $this->channel->send(sprintf('Vous avez %s en banque.', $this->getBalance($this->author)));
     }
 
-    /**
-     * @return String
-     */
-    protected function help() : String
+    protected function help()
     {
         return '';
         // TODO: Implement help() method.
+    }
+
+    private function getBalance(User $user)
+    {
+        $balanceQuery = $this->db->select('users', [
+            "[>]banks" =>  ["id" => "user_id"],
+        ], [
+            'balance',
+        ], [
+            'discord_id' => $user->id
+        ]);
+
+        return $balanceQuery[0]['balance'];
     }
 
     /**
@@ -82,30 +92,9 @@ class Register extends AbstractCommand
         }
 
         if (!$this->isAdmin()) {
-            $this->channel->send('Cette commande n\'existe pas. Essayez "?register"');
+            $this->channel->send('Cette commande n\'existe pas. Essayez "?balance"');
         }
 
         return $this->message->mentions->users;
-    }
-
-    /**
-     * @param User $user
-     *
-     * @return $this
-     */
-    private function insert(User $user)
-    {
-        $this->db->insert('users', [
-            'discord_id' => $user->id
-        ]);
-
-        $userId = $this->db->id();
-
-        $this->db->insert('banks', [
-            'balance' => 0,
-            'user_id' => $userId,
-        ]);
-
-        return $this;
     }
 }
