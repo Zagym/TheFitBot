@@ -36,13 +36,17 @@ class Database
     {
         self::$dbName = $dbName;
 
-        $this->medooDb= new Medoo([
-            'database_type' => getenv('DB_CONNECTION'),
-            'database_name' => getenv('DB_DATABASE'),
-            'server' => getenv('DB_HOST'),
-            'username' => getenv('DB_USERNAME'),
-            'password' => getenv('DB_PASSWORD'),
-        ]);
+        try {
+            $this->medooDb= new Medoo([
+                'database_type' => getenv('DB_CONNECTION'),
+                'database_name' => getenv('DB_DATABASE'),
+                'server' => getenv('DB_HOST'),
+                'username' => getenv('DB_USERNAME'),
+                'password' => getenv('DB_PASSWORD'),
+            ]);
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+        }
     }
 
     /**

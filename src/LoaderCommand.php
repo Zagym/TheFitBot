@@ -23,9 +23,10 @@ class LoaderCommand
     private function load()
     {
         $command = substr($this->message->content, 1);
+        $command = explode(' ', $command);
 
-        if (array_key_exists($command, self::commands())) {
-            $class = self::commands()[$command];
+        if (array_key_exists($command[0], self::commands())) {
+            $class = self::commands()[$command[0]];
             new $class($this->message);
         }
     }
