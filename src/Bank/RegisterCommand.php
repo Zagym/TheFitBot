@@ -9,7 +9,7 @@ use Medoo\Medoo;
 use CharlotteDunois\Yasmin\Models\User;
 use CharlotteDunois\Yasmin\Utils\Collection;
 
-class Register extends AbstractCommand
+class RegisterCommand extends AbstractCommand
 {
     use BankTrait;
 
@@ -36,6 +36,10 @@ class Register extends AbstractCommand
         $users = $this->getUser();
 
         if ($users instanceof Collection) {
+            if (!$this->isAdmin()) {
+
+               return $this->channel->send('Cette commande n\'existe pas. Essayez "?register"');
+            }
             $messages = null;
 
             /** @var User $user */
@@ -61,31 +65,9 @@ class Register extends AbstractCommand
         return $this->channel->send('Votre compte à été créé.');
     }
 
-    /**
-     * @return String
-     */
-    protected function help() : String
+    protected function help()
     {
-        return '';
         // TODO: Implement help() method.
-    }
-
-    /**
-     * @return User|Collection
-     */
-    private function getUser()
-    {
-        $wordCount = explode(' ', $this->message->content);
-
-        if (count($wordCount) == 1) {
-            return $this->author;
-        }
-
-        if (!$this->isAdmin()) {
-            $this->channel->send('Cette commande n\'existe pas. Essayez "?register"');
-        }
-
-        return $this->message->mentions->users;
     }
 
     /**
@@ -96,7 +78,8 @@ class Register extends AbstractCommand
     private function insert(User $user)
     {
         $this->db->insert('users', [
-            'discord_id' => $user->id
+            'discord_id' => $user->id,
+            'username' => $user->username,
         ]);
 
         $userId = $this->db->id();

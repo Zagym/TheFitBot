@@ -9,7 +9,7 @@ use CharlotteDunois\Yasmin\Models\User;
 use CharlotteDunois\Yasmin\Utils\Collection;
 use Medoo\Medoo;
 
-class Balance extends AbstractCommand
+class BalanceCommand extends AbstractCommand
 {
     use BankTrait;
 
@@ -36,6 +36,10 @@ class Balance extends AbstractCommand
         $users = $this->getUser();
 
         if ($users instanceof Collection) {
+            if (!$this->isAdmin()) {
+
+                return $this->channel->send('Cette commande n\'existe pas. Essayez "?balance"');
+            }
             $messages = null;
 
             /** @var User $user */
@@ -63,7 +67,6 @@ class Balance extends AbstractCommand
 
     protected function help()
     {
-        return '';
         // TODO: Implement help() method.
     }
 
@@ -78,23 +81,5 @@ class Balance extends AbstractCommand
         ]);
 
         return $balanceQuery[0]['balance'];
-    }
-
-    /**
-     * @return User|Collection
-     */
-    private function getUser()
-    {
-        $wordCount = explode(' ', $this->message->content);
-
-        if (count($wordCount) == 1) {
-            return $this->author;
-        }
-
-        if (!$this->isAdmin()) {
-            $this->channel->send('Cette commande n\'existe pas. Essayez "?balance"');
-        }
-
-        return $this->message->mentions->users;
     }
 }

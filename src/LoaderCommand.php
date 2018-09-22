@@ -2,8 +2,9 @@
 
 namespace App;
 
-use App\Bank\Balance;
-use App\Bank\Register;
+use App\Bank\BalanceCommand;
+use App\Bank\RegisterCommand;
+use App\Bank\SetCommand;
 use CharlotteDunois\Yasmin\Models\Message;
 
 class LoaderCommand
@@ -35,8 +36,9 @@ class LoaderCommand
     private static function commands()
     {
         return [
-            'register' => Register::class,
-            'balance' => Balance::class,
+            'register' => RegisterCommand::class,
+            'balance' => BalanceCommand::class,
+            'set' => SetCommand::class,
         ];
     }
 }
