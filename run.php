@@ -2,25 +2,27 @@
 
 include __DIR__.'/vendor/autoload.php';
 
-use Discord\Discord;
+use React\EventLoop\Factory;
+use CharlotteDunois\Yasmin\Client;
+
+$loop = Factory::create();
+try {
+    $discord = new Client(array(), $loop);
+} catch (Exception $e) {
+    echo $e->getMessage();
+}
 
 $dotenv = new Dotenv\Dotenv(__DIR__);
 $dotenv->load();
 
-$discord = new Discord([
-    'token' => getenv('BOT_TOKEN'),
-]);
-
-$discord->on('ready', function ($discord) {
+$discord->on('ready', function () use ($discord) {
     echo "Bot is ready!", PHP_EOL;
-
-    /**
-     * @var \Discord\Parts\Channel\Message $message
-     * @var Discord $discord
-     */
-    $discord->on('message', function ($message, $discord) {
-        new App\LoaderCommand($message);
-    });
 });
 
-$discord->run();
+$discord->on('message', function ($message) {
+    /** @var \CharlotteDunois\Yasmin\Models\Message $message */
+    new App\LoaderCommand($message);
+});
+
+$discord->login(getenv('BOT_TOKEN'));
+$loop->run();

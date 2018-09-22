@@ -4,11 +4,11 @@ namespace App\Bank;
 
 use App\AbstractCommand;
 use App\Database;
-use Discord\Helpers\Collection;
-use Discord\Parts\Channel\Message;
-use Discord\Parts\Guild\Role;
-use Discord\Parts\User\User;
+use CharlotteDunois\Yasmin\Models\Message;
+use CharlotteDunois\Yasmin\Models\Role;
 use Medoo\Medoo;
+use CharlotteDunois\Yasmin\Models\User;
+use CharlotteDunois\Yasmin\Utils\Collection;
 
 class Register extends AbstractCommand
 {
@@ -47,19 +47,15 @@ class Register extends AbstractCommand
             }
 
             if ($errorMsg) {
-                $this->channel->sendMessage($errorMsg);
+                $this->channel->send($errorMsg);
                 return;
             }
         } else {
-            // Here users is a Member. So I just get the user from the member.
-            /** @var User $user */
-            $user = $users->getUserAttribute();
-
-            if ($this->isUserInDb($user)) {
-                $this->channel->sendMessage('Vous avez déjà un compte.');
+            if ($this->isUserInDb($users)) {
+                $this->channel->send('Vous avez déjà un compte.');
                 return;
             }
-            $this->insert($user);
+            $this->insert($users);
         }
     }
 
@@ -73,7 +69,7 @@ class Register extends AbstractCommand
     }
 
     /**
-     * @return Collection|User
+     * @return User|Collection
      */
     private function getUser()
     {
@@ -84,10 +80,10 @@ class Register extends AbstractCommand
         }
 
         if (!$this->isAdmin()) {
-            $this->channel->sendMessage('Cette commande n\'existe pas. Essayez "?register"');
+            $this->channel->send('Cette commande n\'existe pas. Essayez "?register"');
         }
 
-        return $this->message->getMentionsAttribute();
+        return $this->message->mentions->users;
     }
 
     /**
@@ -95,11 +91,11 @@ class Register extends AbstractCommand
      */
     private function isAdmin() : bool
     {
-        $roles = $this->message->author->roles;
+        $roles = $this->message->member->roles;
 
         /** @var Role $role */
         foreach ($roles as $role) {
-            if ($role->permissions->ban_members) {
+            if ($role->permissions->has('BAN_MEMBERS')) {
                 return true;
             }
         }
@@ -107,6 +103,11 @@ class Register extends AbstractCommand
         return false;
     }
 
+    /**
+     * @param User $user
+     *
+     * @return $this
+     */
     private function insert(User $user)
     {
         $this->db->insert('users', [
@@ -123,6 +124,11 @@ class Register extends AbstractCommand
         return $this;
     }
 
+    /**
+     * @param User $user
+     *
+     * @return bool
+     */
     private function isUserInDb(User $user)
     {
         return $this->db->has('users', [

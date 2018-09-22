@@ -4,7 +4,7 @@ namespace App;
 
 use App\Bank\Balance;
 use App\Bank\Register;
-use Discord\Parts\Channel\Message;
+use CharlotteDunois\Yasmin\Models\Message;
 
 class LoaderCommand
 {

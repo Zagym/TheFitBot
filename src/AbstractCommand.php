@@ -2,8 +2,9 @@
 
 namespace App;
 
-use Discord\Parts\Channel\Message;
-use Discord\Parts\Channel\Channel;
+
+use CharlotteDunois\Yasmin\Models\Message;
+use CharlotteDunois\Yasmin\Interfaces\TextChannelInterface as Channel;
 
 abstract class AbstractCommand
 {
