@@ -7,30 +7,23 @@ use App\Database;
 use Discord\Helpers\Collection;
 use Discord\Parts\Channel\Message;
 use Discord\Parts\Guild\Role;
-use Discord\Parts\Channel\Channel;
 use Discord\Parts\User\User;
 use Medoo\Medoo;
 
 class Register extends AbstractCommand
 {
-    /** @var Message $message */
-    private $message;
-
-    /** @var Channel $channel */
-    private $channel;
-
     /** @var Medoo $db */
     private $db;
 
     public function __construct(Message $message)
     {
-        $this->message = $message;
-        $this->channel = $message->channel;
+        parent::__construct($message);
 
         try {
             $medoo = Database::getInstance(getenv('DB_DATABASE'));
         } catch (\Exception $e) {
             echo $e->getMessage();
+            return;
         }
         $this->db = $medoo->getMedooDb();
 
@@ -70,12 +63,18 @@ class Register extends AbstractCommand
         }
     }
 
+    /**
+     * @return String
+     */
     protected function help() : String
     {
-        return;
+        return '';
         // TODO: Implement help() method.
     }
 
+    /**
+     * @return Collection|User
+     */
     private function getUser()
     {
         $wordCount = explode(' ', $this->message->content);

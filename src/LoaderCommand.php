@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Bank\Balance;
 use App\Bank\Register;
 use Discord\Parts\Channel\Message;
 
@@ -35,6 +36,7 @@ class LoaderCommand
     {
         return [
             'register' => Register::class,
+            'balance' => Balance::class,
         ];
     }
 }
