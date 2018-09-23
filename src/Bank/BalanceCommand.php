@@ -4,6 +4,7 @@ namespace App\Bank;
 
 use App\AbstractCommand;
 use App\Database;
+use App\Repository\BankRepository;
 use CharlotteDunois\Yasmin\Models\Message;
 use CharlotteDunois\Yasmin\Models\User;
 use CharlotteDunois\Yasmin\Utils\Collection;
@@ -33,6 +34,7 @@ class BalanceCommand extends AbstractCommand
 
     protected function load()
     {
+        $banks = new BankRepository();
         $users = $this->getUser();
 
         if ($users instanceof Collection) {
@@ -51,7 +53,7 @@ class BalanceCommand extends AbstractCommand
                 $messages .= sprintf(
                     'L\'utilisateur %s a %s en banque.' . PHP_EOL,
                     $user->username,
-                    $this->getBalance($this->author)
+                    $banks->getBalance($this->author)
                 );
             }
 
@@ -62,24 +64,11 @@ class BalanceCommand extends AbstractCommand
             return $this->channel->send('Vous n\'avez pas encore de compte. Veuillez vous enregistrer avec la commande "?register"');
         }
 
-        return $this->channel->send(sprintf('Vous avez %s en banque.', $this->getBalance($this->author)));
+        return $this->channel->send(sprintf('Vous avez %s en banque.', $banks->getBalance($this->author)));
     }
 
     protected function help()
     {
         // TODO: Implement help() method.
-    }
-
-    private function getBalance(User $user)
-    {
-        $balanceQuery = $this->db->select('users', [
-            "[>]banks" =>  ["id" => "user_id"],
-        ], [
-            'balance',
-        ], [
-            'discord_id' => $user->id
-        ]);
-
-        return $balanceQuery[0]['balance'];
     }
 }

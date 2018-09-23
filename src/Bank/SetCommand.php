@@ -4,8 +4,8 @@ namespace App\Bank;
 
 use App\AbstractCommand;
 use App\Database;
+use App\Repository\BankRepository;
 use CharlotteDunois\Yasmin\Models\Message;
-use CharlotteDunois\Yasmin\Models\User;
 use Medoo\Medoo;
 
 class SetCommand extends AbstractCommand
@@ -46,7 +46,8 @@ class SetCommand extends AbstractCommand
          return $this->channel->send(sprintf('L\'utilisateur %s n\'as pas de compte.', $user->username));
         }
 
-        $this->setBalance($user, $this->getNumber());
+        $banks = new BankRepository();
+        $banks->setBalance($this->getUserIdDb($user), $this->getNumber());
 
         if ($user->id == $this->author->id) {
             return $this->channel->send(sprintf('Vous avez maintenant %s en banque.', $this->getNumber()));
@@ -80,16 +81,5 @@ class SetCommand extends AbstractCommand
         }
 
         return $command[2];
-    }
-
-    private function setBalance(User $user, $number)
-    {
-        $this->db->update('banks', [
-            'balance' => $number
-        ], [
-            'user_id' => $this->getUserIdDb($user)
-        ]);
-
-        return $this;
     }
 }

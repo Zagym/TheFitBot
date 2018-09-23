@@ -4,6 +4,7 @@ namespace App\Bank;
 
 use App\AbstractCommand;
 use App\Database;
+use App\Repository\BankRepository;
 use CharlotteDunois\Yasmin\Models\Message;
 use Medoo\Medoo;
 use CharlotteDunois\Yasmin\Models\User;
@@ -33,6 +34,7 @@ class RegisterCommand extends AbstractCommand
 
     protected function load()
     {
+        $banks = new BankRepository();
         $users = $this->getUser();
 
         if ($users instanceof Collection) {
@@ -48,7 +50,7 @@ class RegisterCommand extends AbstractCommand
                     $messages .= sprintf('L\'utilisateur %s a déjà un compte.' . PHP_EOL, $user->username);
                     continue;
                 }
-                $this->insert($user);
+                $banks->insert($user);
                 $messages .= sprintf('Le compte de l\'utilisateur %s a été créé.' . PHP_EOL, $user->username);
             }
 
@@ -60,7 +62,7 @@ class RegisterCommand extends AbstractCommand
             return $this->channel->send('Vous avez déjà un compte.');
         }
 
-        $this->insert($users);
+        $banks->insert($users);
 
         return $this->channel->send('Votre compte à été créé.');
     }
@@ -68,27 +70,5 @@ class RegisterCommand extends AbstractCommand
     protected function help()
     {
         // TODO: Implement help() method.
-    }
-
-    /**
-     * @param User $user
-     *
-     * @return $this
-     */
-    private function insert(User $user)
-    {
-        $this->db->insert('users', [
-            'discord_id' => $user->id,
-            'username' => $user->username,
-        ]);
-
-        $userId = $this->db->id();
-
-        $this->db->insert('banks', [
-            'balance' => 0,
-            'user_id' => $userId,
-        ]);
-
-        return $this;
     }
 }
