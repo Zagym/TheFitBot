@@ -53,4 +53,15 @@ class BankRepository extends BaseRepository
 
         return $this;
     }
+
+    public function addBalance($userId, $number)
+    {
+        $this->db->update('banks', [
+            'balance[+]' => $number
+        ], [
+            'user_id' => $userId
+        ]);
+
+        return $this;
+    }
 }

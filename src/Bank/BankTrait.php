@@ -9,20 +9,6 @@ use CharlotteDunois\Yasmin\Utils\Collection;
 trait BankTrait
 {
     /**
-     * @param User $user
-     *
-     * @return bool
-     */
-    private function isUserInDb(User $user)
-    {
-        return $this->db->has('users', [
-            'AND' => [
-                'discord_id' => $user->id
-            ]
-        ]);
-    }
-
-    /**
      * @return bool
      */
     private function isAdmin() : bool
@@ -52,14 +38,5 @@ trait BankTrait
         }
 
         return $this->message->mentions->users;
-    }
-
-    private function getUserIdDb(User $user)
-    {
-        $userId = $this->db->select('users', 'id', [
-            'discord_id' => $user->id
-        ]);
-
-        return $userId[0];
     }
 }

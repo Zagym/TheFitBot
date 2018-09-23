@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Bank\AddCommand;
 use App\Bank\BalanceCommand;
 use App\Bank\RegisterCommand;
 use App\Bank\SetCommand;
@@ -39,6 +40,7 @@ class LoaderCommand
             'register' => RegisterCommand::class,
             'balance' => BalanceCommand::class,
             'set' => SetCommand::class,
+            'add' => AddCommand::class,
         ];
     }
 }

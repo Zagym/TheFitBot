@@ -7,7 +7,7 @@ use App\Repository\BankRepository;
 use App\Repository\UserRepository;
 use CharlotteDunois\Yasmin\Models\Message;
 
-class SetCommand extends AbstractCommand
+class AddCommand extends AbstractCommand
 {
     use BankTrait;
 
@@ -25,25 +25,27 @@ class SetCommand extends AbstractCommand
         }
 
         if (!$this->getNumber()) {
-            return $this->channel->send('Il y a une erreur dans votre commande. Essayez : '. PHP_EOL .'"?set @User [Nombre]"');
+            return $this->channel->send('Il y a une erreur dans votre commande. Essayez : '. PHP_EOL .
+                '```?add @User [Nombre]```Le nombre doit être au maximum de 999.');
         }
 
         $userCollection = $this->getUser();
         $user = $userCollection->first();
         $userRepo = new UserRepository();
 
+
         if (!$userRepo->hasUser($user)) {
          return $this->channel->send(sprintf('L\'utilisateur %s n\'as pas de compte.', $user->username));
         }
 
         $bankRepo = new BankRepository();
-        $bankRepo->setBalance($userRepo->getUserId($user), $this->getNumber());
+        $bankRepo->addBalance($userRepo->getUserId($user), $this->getNumber());
 
         if ($user->id == $this->author->id) {
-            return $this->channel->send(sprintf('Vous avez maintenant %s en banque.', $this->getNumber()));
+            return $this->channel->send(sprintf('Vous avez maintenant %s en banque.', $bankRepo->getBalance($user)));
         }
 
-        return $this->channel->send(sprintf('L\'utilisateur %s a maintenant %s en banque', $user->username, $this->getNumber()));
+        return $this->channel->send(sprintf('L\'utilisateur %s a maintenant %s en banque', $user->username, $bankRepo->getBalance($user)));
     }
 
     protected function help()
@@ -70,7 +72,7 @@ class SetCommand extends AbstractCommand
             return false;
         }
 
-        if ($command[2] < 1 && $command[2] > 999) {
+        if ($command[2] < 1 || $command[2] > 999) {
             return false;
         }
 
